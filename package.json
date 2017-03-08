@@ -1,0 +1,30 @@
+{
+  "name": "imge430_project",
+  "version": "1.0.0",
+  "engines": {
+    "node": "7.4.0",
+    "npm": "4.0.5"
+  },
+  "description": "IGME430 Project1",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Test Complete\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zxw8994/IGME430_Project.git"
+  },
+  "author": "Zachary Wilken",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/zxw8994/IGME430_Project/issues"
+  },
+  "homepage": "https://github.com/zxw8994/IGME430_Project#readme",
+  "devDependencies": {
+    "eslint": "^3.17.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0"
+  }
+}
