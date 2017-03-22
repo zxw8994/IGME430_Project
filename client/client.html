@@ -7,92 +7,121 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     
-    
-    const parseJSON = (xhr,content) => {
+    // Used to parse server response
+    const parseJSON = (xhr,content,viewNote) => {
         const obj = JSON.parse(xhr.response);
         console.dir(obj);
-        
         //if(obj.message) {
         //    const p = document.createElement('p');
         //    p.textContent = `Message: ${obj.message}`;
         //    content.appendChild(p);
         //}
         
+        // if response contains a note, print it to the screen
         if(obj.note) {
-            const noteList = document.createElement('p');
-            const note = JSON.stringify(obj.note);
+            noteList = document.createElement('p');
+            notee = JSON.stringify(obj.note);
             //const note = `${obj.message}`;
-            noteList.textContent = note;
+            noteList.textContent = notee;
             content.appendChild(noteList);
+
+        }
+        
+        // if response contains a note title and body, print it to the screen
+        if(obj.addedTitle && obj.addedBody) {
+            const contentNt = document.createElement('div');
+            contentNt.className = 'noteList';
+            content.appendChild(contentNt);
+            const pT = document.createElement('p');
+            const pN = document.createElement('p');
+            pT.textContent = `Title: ${obj.addedTitle}`;
+            pN.textContent = `Note: ${obj.addedBody}`;
+
+            contentNt.appendChild(pT);
+            contentNt.appendChild(pN);
+ 
+        }
+        
+        // if response contains a note title and body from searching, print it to the screen
+        if(obj.noteTitle && obj.noteBody) {
+            viewNote.innerHTML = "";
+            const viewNt = document.createElement('div');
+            viewNote.appendChild(viewNt);
+            const pT = document.createElement('p');
+            const pN = document.createElement('p');
+            pT.textContent = `Title: ${obj.noteTitle}`;
+            pN.textContent = `Note: ${obj.noteBody}`;
+
+            viewNt.appendChild(pT);
+            viewNt.appendChild(pN);
         }
     };
     
-
+    // handle the response
     const handleResponse = (xhr, parseResponse) => {
         const content = document.querySelector('#content');
-           
+        const viewNote = document.querySelector('#viewNote');
+        const status = document.querySelector('#status');
         //console.log(xhr.getResponseHeader ('etag'));
         
         console.log(xhr.status);
         
         if(parseResponse != null){
-            switch(xhr.status){
+            /*switch(xhr.status){
                 case 200: 
-                  content.innerHTML = `<b>Success</b>`;
+                  status.innerHTML = `<b>Success</b>`;
                   break;
                 case 201: 
-                  content.innerHTML = '<b>Create</b>';
+                  status.innerHTML = '<b>Create</b>';
                   break;
                 case 304: 
-                  content.innerHTML = '<b>Not Modified</b>';
+                  status.innerHTML = '<b>Not Modified</b>';
                   break;
                 case 400: 
-                  content.innerHTML = `<b>Bad Request</b>`;
+                  status.innerHTML = `<b>Bad Request</b>`;
                   break;
                 case 404: 
-                  content.innerHTML = `<b>Resource Not Found</b>`;
+                  status.innerHTML = `<b>Resource Not Found</b>`;
                   break;
                 default: 
-                  content.innerHTML = `Error code not implemented by client.`;
+                  status.innerHTML = `Error code not implemented by client.`;
                   break;
-            }
-            
+            }*/
             
             if(parseResponse) {
-                parseJSON(xhr,content);
+                parseJSON(xhr,content,viewNote);
             } else {
                 console.log('received');
             }
         } else {
-            
-            switch(xhr.status) {
+            /*switch(xhr.status) {
                 case 200:
-                  content.innerHTML = `<b>Success</b>`;
+                  status.innerHTML = `<b>Success</b>`;
                   break;
                 case 201:
-                  content.innerHTML = '<b>Create</b>';
+                  status.innerHTML = '<b>Create</b>';
                   break;
                 case 204: 
-                  content.innerHTML = '<b>Updated (No Content)</b>';
+                  status.innerHTML = '<b>Updated (No Content)</b>';
                   return;
                 case 400:
-                  content.innerHTML = `<b>Bad Request</b>`;
+                  status.innerHTML = `<b>Bad Request</b>`;
                   break;
                 default:
-                  content.innerHTML = `Error code not implemented by client.`;
+                  status.innerHTML = `Error code not implemented by client.`;
                   break;
-            }
-            parseJSON(xhr, content); 
+            }*/
+            parseJSON(xhr, content,viewNote); 
         }
         
     };
 
-
+    // sends post request to search for specific note title
     const titleSearch = (e,searchForm) => {
         const nameAction = searchForm.getAttribute('action');
         const nameMethod = searchForm.getAttribute('method');
         
-        const searchField = searchForm.querySelector('#searchield');
+        const searchField = searchForm.querySelector('#searchField');
     
         const xhr = new XMLHttpRequest();
         xhr.open(nameMethod, nameAction);
@@ -102,16 +131,18 @@
         
         xhr.onload = () => handleResponse(xhr,null);
         
-        const formData = searchField.value;
+        const formData = `title=${searchField.value}`;
         
         xhr.send(formData);
         
         e.preventDefault();
         
+        searchField.value = "";
+        
         return false;
     };
     
-
+    // sends post request to add a note
     const sendPost = (e, noteForm) => {
       const nameAction = noteForm.getAttribute('action');
       const nameMethod = noteForm.getAttribute('method');
@@ -133,19 +164,20 @@
     
       e.preventDefault();
         
+      titleField.value = "";
+      noteField.value = "";
+        
       return false;
     };
 
-
+    // sends request to get the added note
     const requestUpdate = (e, userForm) => {
-      
-      const url = userForm.querySelector('#urlField').value;
       
       const method = userForm.querySelector('#methodSelect').value;
       
       const xhr = new XMLHttpRequest();
       
-      xhr.open(method, url);
+      xhr.open(method, userForm.action);
       xhr.setRequestHeader('Accept', 'application/json');
 
       if(method == 'get') {
@@ -161,53 +193,69 @@
       return false;
     };
 
+    // sends request to get the searched note
+    const searchUpdate = (e,returnForm) => {
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.open(returnForm.method, returnForm.action);
+        xhr.setRequestHeader('Accept', 'application/json');
+        
+        xhr.onload = () => handleResponse(xhr, true);
+        
+        xhr.send();
+        
+        e.preventDefault();
+
+        return false;
+    };
 
     const init = () => {
         const userForm = document.querySelector('#userForm');
         const noteForm = document.querySelector('#noteForm');
         const searchForm = document.querySelector('#searchForm');
+        const returnSearch = document.querySelector('#returnForm');
         
-        const addNote = (e) => sendPost(e, noteForm);
-        const getNote = (e) => requestUpdate(e, userForm);
-        const searchNote = (e) => titleSearch(e,searchForm);
-        
+        const addNote = (e) => {
+            sendPost(e, noteForm);
+            requestUpdate(e, userForm);
+        };
+        const searchNote = (e) => {
+            titleSearch(e,searchForm);
+            searchUpdate(e, returnSearch);
+        };
 
         noteForm.addEventListener('submit', addNote);
-        userForm.addEventListener('submit', getNote);
         searchForm.addEventListener('submit',searchNote);
     };
 
     window.onload = init; 
-
-    
-    
     
   </script>
 </head>
 <body>
-  <section id="">
+  <section id="viewNote"></section>
+  <section id="top">
     <form id="noteForm" action="/addNote" method="post">
         <input id="titleField" placeholder="Enter Title">
-        <textarea id="noteField" rows="10" cols="20" placeholder="Enter Notes"></textarea>
+        <textarea id="noteField" rows="10" cols="22" placeholder="Enter Notes"></textarea>
         <input type="submit" value="Submit Note" />
     </form>
     <form id="userForm" action="/getNote" method="get">
-      <select id='urlField'>
-        <option value='/getNote'>/getUsers</option>
-        <option value='/notReal'>/notReal</option>
-      </select>
       <select id="methodSelect">
         <option value="get">GET</option>
         <option value="head">HEAD</option>
       </select>
-      <input type="submit" value="Get Note" />
     </form>
-    <form id="searchForm" action="/findNote" method="get">
+    <form id="searchForm" action="/findNote" method="post">
         <input id="searchField" placeholder="Search for a Title" >
         <input type="submit" value="Search" />
     </form>
+    <form id="returnForm" action="/returnSearch" method="get">
+    </form>
 </section>
-  <section id="content">
-  </section>
+
+<section id="status"></section>
+<section id="content"></section>
 </body>
 </html>

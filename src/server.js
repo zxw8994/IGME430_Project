@@ -21,30 +21,9 @@ const handleGet = (request, response, parsedUrl) => {
     case '/notReal':
       jsonHandler.notFound(request, response);
       break;
-    /* case '/findNote':
-
-      const res = response;
-
-      request.on('error', (err) => {
-        console.dir(err);
-        res.statusCode = 400;
-        res.end();
-      });
-
-      const title = [];
-
-      request.on('data', (chunk) => {
-        title.push(chunk);
-            // title = chunk;
-      });
-
-      request.on('end', () => {
-        const titleString = Buffer.concat(title).toString();
-        const titleParams = query.parse(titleString);
-
-        jsonHandler.findNote(request, res, titleParams);
-      });
-      break; */
+    case '/returnSearch':
+      jsonHandler.returnNote(request, response);
+      break;
     default:
       jsonHandler.notFound(request, response);
       break;
@@ -80,6 +59,28 @@ const handlePost = (request, response, parsedUrl) => {
       const bodyParams = query.parse(bodyString);
 
       jsonHandler.addNote(request, res, bodyParams);
+    });
+  } else if (parsedUrl.pathname === '/findNote') {
+    const res = response;
+
+    request.on('error', (err) => {
+      console.dir(err);
+      res.statusCode = 400;
+      res.end();
+    });
+
+    const title = [];
+
+    request.on('data', (chunk) => {
+      title.push(chunk);
+            // title = chunk;
+    });
+
+    request.on('end', () => {
+      const titleString = Buffer.concat(title).toString();
+      const titleParams = query.parse(titleString);
+
+      jsonHandler.findNote(request, res, titleParams);
     });
   }
 };

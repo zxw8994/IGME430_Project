@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/zxw8994/IGME430_Project#readme",
   "devDependencies": {
-    "eslint": "^3.17.0",
+    "eslint": "^3.17.1",
     "eslint-config-airbnb": "^14.1.0",
     "eslint-plugin-import": "^2.2.0"
   }
